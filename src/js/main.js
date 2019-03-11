@@ -1,4 +1,28 @@
-console.log("Test js")
+document.addEventListener("DOMContentLoaded", function(event) {
+    const buttonEl = document.getElementById('button')
+    buttonEl.onclick = function() {
+        toggleButtonText(buttonEl)
+    }
+});
+
+let toggleButtonText = function(buttonElement) {
+    buttonElement.innerText = buttonElement.innerText.indexOf("Night") === -1 ? "Switch to Night Mode" : "Switch to Day Mode"
+}
+
+// if (el.classList) {
+//     el.classList.toggle(className);
+//   } else {
+//     var classes = el.className.split(' ');
+//     var existingIndex = classes.indexOf(className);
+  
+//     if (existingIndex >= 0)
+//       classes.splice(existingIndex, 1);
+//     else
+//       classes.push(className);
+  
+//     el.className = classes.join(' ');
+// }
+
 
 // Example of dynamic creation of svg
 // // create svg
