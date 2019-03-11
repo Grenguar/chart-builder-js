@@ -7,10 +7,10 @@
     text-anchor: end;
 }
 
-.graph {
+/* .graph {
     height: 600px;
     width: 600px;
-}
+} */
 
 .graph .grid {
     stroke: #ccc;
