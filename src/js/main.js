@@ -1,19 +1,16 @@
+const svgns = "http://www.w3.org/2000/svg"
+const svg = document.getElementById('chart')
+const baseLineY = document.getElementById('baseLine').getAttribute('y1')
+const upperLineY = document.getElementById('upperLine').getAttribute('y1')
+const sampleChartEl = document.getElementById('sampleChart')
+
 document.addEventListener("DOMContentLoaded", function(event) {
     const buttonEl = document.getElementById('button')
     buttonEl.onclick = function() {
         switchTheme()
     }
     const data = getChartData(chartData)
-    document.getElementById("chart").addEventListener('mousemove', function(event) {
-        let _clientX = event.clientX
-        let _clientY = event.clientY;
-        // console.log("X: " + _clientX + "Y: " + _clientY)
-    });
-    document.getElementById("chart").addEventListener('touchmove', function(event) {
-        let _clientX = event.clientX
-        let _clientY = event.clientY;
-        // console.log("X: " + _clientX + "Y: " + _clientY)
-    });
+    svg.addEventListener('mousemove', drawVerticalLine, false);
 });
 
 let switchTheme = function() {
@@ -62,20 +59,33 @@ let getChartData = function(object) {
     return JSON.parse(object)
 }
 
+let drawVerticalLine = function(e) {
+    let verticalLineEl = document.getElementById('verticalLine')
+    if (verticalLineEl !== null) {
+        verticalLineEl.parentNode.removeChild(verticalLineEl)
+    }
+    let pt = svg.createSVGPoint(), svgP, line
+    pt.x = e.clientX;
+    pt.y = e.clientY;
+    svgP = pt.matrixTransform(svg.getScreenCTM().inverse());
+    line = document.createElementNS(svgns,'line')
+    line.setAttribute('x1', svgP.x)
+    line.setAttribute('y1', upperLineY)
+    line.setAttribute('x2', svgP.x)
+    line.setAttribute('y2', baseLineY)
+    line.classList.add('grid')
+    line.setAttribute('id', 'verticalLine')
+    svg.appendChild(line)    
+    if (intersectRect(line, sampleChartEl)) {
+        //There will be code about creating point of intersection
+    }
+}
 
-
-
-// Example of dynamic creation of svg
-// // create svg
-// var svgURI = 'http://www.w3.org/2000/svg';
-// var svg = document.createElementNS( svgURI, 'svg' );
-// // SVG attributes, like viewBox, are camelCased. That threw me for a loop
-// svg.setAttribute( 'viewBox', '0 0 100 100' );
-// // create arrow
-// var path = document.createElementNS( svgURI, 'path' );
-// path.setAttribute( 'd', 'M 50,0 L 60,10 L 20,50 L 60,90 L 50,100 L 0,50 Z' );
-// // add class so it can be styled with CSS
-// path.setAttribute( 'class', 'arrow' );
-// svg.appendChild( path );
-// // add svg to page
-// element.appendChild( svg );
+function intersectRect(r1, r2) {
+    var r1 = r1.getBoundingClientRect();
+    var r2 = r2.getBoundingClientRect();
+    return !(r2.left > r1.right || 
+           r2.right < r1.left || 
+           r2.top > r1.bottom ||
+           r2.bottom < r1.top);
+}
