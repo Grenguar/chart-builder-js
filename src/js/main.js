@@ -3,7 +3,7 @@ document.addEventListener("DOMContentLoaded", function(event) {
     buttonEl.onclick = function() {
         toggleButtonText(buttonEl)
     }
-    console.log(JSON.stringify(data))
+    console.log(JSON.stringify(chartData))
 });
 
 let toggleButtonText = function(buttonElement) {
