@@ -4,6 +4,16 @@ document.addEventListener("DOMContentLoaded", function(event) {
         switchTheme()
     }
     const data = getChartData(chartData)
+    document.getElementById("chart").addEventListener('mousemove', function(event) {
+        let _clientX = event.clientX
+        let _clientY = event.clientY;
+        // console.log("X: " + _clientX + "Y: " + _clientY)
+    });
+    document.getElementById("chart").addEventListener('touchmove', function(event) {
+        let _clientX = event.clientX
+        let _clientY = event.clientY;
+        // console.log("X: " + _clientX + "Y: " + _clientY)
+    });
 });
 
 let switchTheme = function() {
