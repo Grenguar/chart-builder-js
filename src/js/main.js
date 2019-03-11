@@ -3,11 +3,13 @@ document.addEventListener("DOMContentLoaded", function(event) {
     buttonEl.onclick = function() {
         toggleButtonText(buttonEl)
     }
+    console.log(JSON.stringify(data))
 });
 
 let toggleButtonText = function(buttonElement) {
     buttonElement.innerText = buttonElement.innerText.indexOf("Night") === -1 ? "Switch to Night Mode" : "Switch to Day Mode"
 }
+
 
 // if (el.classList) {
 //     el.classList.toggle(className);
