@@ -1,9 +1,13 @@
-body {
-    background-color: white;
+.night {
+    background-color: rgb(38, 47, 61);
+    fill: rgba(33, 42, 55, 0.5);
+    color: white;
 }
 
-.dark {
-    background-color: rgb(38, 47, 61);
+.day {
+    background-color: white;
+    fill: rgba(237,237,237, 0.5);
+    color: black;
 }
 
 .graph .labels.x-labels {
@@ -11,7 +15,7 @@ body {
 }
   
 .graph .labels.y-labels {
-    text-anchor: end;
+    text-anchor: initial;
 }
 
 .graph {
@@ -21,7 +25,7 @@ body {
 }
 
 .graph .grid {
-    stroke: #ccc;
+    stroke: rgb(224, 230, 234);
     stroke-dasharray: 0;
     stroke-width: 1;
 }
@@ -29,13 +33,14 @@ body {
 .labels {
     font-size: 16px;
     text-align: left;
+    fill: rgb(224, 230, 234)
 }
 
 .label-title {
     font-weight: bold;
     text-transform: uppercase;
     font-size: 12px;
-    fill: black;
+    fill: rgb(224, 230, 234);
 }
 
 .data {
@@ -44,7 +49,6 @@ body {
 }
 
 .button {
-    background-color: white;
     border: none;
     color: #0088CC;
     padding: 15px 32px;
@@ -53,6 +57,10 @@ body {
     display: inline-block;
     font-size: 20px;
     width: 100%;
+}
+
+.button:hover {
+    cursor: pointer;
 }
 
 .footer {

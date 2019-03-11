@@ -1,13 +1,51 @@
 document.addEventListener("DOMContentLoaded", function(event) {
     const buttonEl = document.getElementById('button')
     buttonEl.onclick = function() {
-        switchTheme(buttonEl)
+        switchTheme()
     }
     const data = getChartData(chartData)
 });
 
-let switchTheme = function(buttonElement) {
-    buttonElement.innerText = buttonElement.innerText.indexOf("Night") === -1 ? "Switch to Night Mode" : "Switch to Day Mode"
+let switchTheme = function() {
+    let theme = "day"
+    let buttonElement = document.getElementById('button')
+    let bodyElement = document.getElementById('body')
+    let minimapElement = document.getElementById('minimap')
+    let headerElement = document.getElementById('header')
+    if (buttonElement.innerText.indexOf("Night") === -1) {
+        buttonElement.innerText = "Switch to Night Mode"
+        theme = "night"
+        toggleClass(buttonElement, "day")
+        toggleClass(bodyElement, "day")
+        toggleClass(minimapElement, "day")
+        toggleClass(headerElement, "day")
+    } else {
+        buttonElement.innerText = "Switch to Day Mode"
+        theme = "day"
+        toggleClass(buttonElement, "night")
+        toggleClass(bodyElement, "night")
+        toggleClass(minimapElement, "night")
+        toggleClass(headerElement, "night")
+    }
+    toggleClass(buttonElement, theme)
+    toggleClass(bodyElement, theme)
+    toggleClass(minimapElement, theme)
+    toggleClass(headerElement, theme)
+}
+
+let toggleClass = function(el, className) {
+    if (el.classList) {
+        el.classList.toggle(className);
+    } else {
+        let classes = el.className.split(' ');
+        let existingIndex = classes.indexOf(className);
+        if (existingIndex >= 0) {
+            classes.splice(existingIndex, 1);
+        } else {
+            classes.push(className);
+        }
+        el.className = classes.join(' ');
+    }
 }
 
 let getChartData = function(object) {
@@ -15,19 +53,6 @@ let getChartData = function(object) {
 }
 
 
-// if (el.classList) {
-//     el.classList.toggle(className);
-//   } else {
-//     var classes = el.className.split(' ');
-//     var existingIndex = classes.indexOf(className);
-  
-//     if (existingIndex >= 0)
-//       classes.splice(existingIndex, 1);
-//     else
-//       classes.push(className);
-  
-//     el.className = classes.join(' ');
-// }
 
 
 // Example of dynamic creation of svg
