@@ -1,13 +1,17 @@
 document.addEventListener("DOMContentLoaded", function(event) {
     const buttonEl = document.getElementById('button')
     buttonEl.onclick = function() {
-        toggleButtonText(buttonEl)
+        switchTheme(buttonEl)
     }
-    console.log(JSON.stringify(chartData))
+    const data = getChartData(chartData)
 });
 
-let toggleButtonText = function(buttonElement) {
+let switchTheme = function(buttonElement) {
     buttonElement.innerText = buttonElement.innerText.indexOf("Night") === -1 ? "Switch to Night Mode" : "Switch to Day Mode"
+}
+
+let getChartData = function(object) {
+    return JSON.parse(object)
 }
 
 
