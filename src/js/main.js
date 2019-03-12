@@ -12,9 +12,9 @@ document.addEventListener("DOMContentLoaded", function() {
     }
     svg.addEventListener('mousemove', drawVerticalLine, false);
     const data = getChartData(chartData)
-    console.log(data)
-    //Drawing first polyline in minimap
-    drawPolylineForMinimap(data[0], minimapElement)
+    // console.log(data)
+    //Drawing first minimap
+    drawchartsForMinimap(data[0], minimapElement)
 });
 
 /**
@@ -102,36 +102,52 @@ function intersectRect(r1, r2) {
 }
 
 /**
- * Drawing graph for minimap
+ * Drawing minimap charts
  */
 
 // function drawMinimap(data) {
 //     
 // }
 
-let drawPolylineForMinimap = function (chartData, minimapEl) {
+let drawchartsForMinimap = function (chartData, minimapEl) {
     let minimapElXOrigin = parseInt(minimapEl.getAttribute('x'))
     let minimapElYOrigin = parseInt(minimapEl.getAttribute('y')) + parseInt(minimapEl.getAttribute('height'))
     let minimapElMaxX = minimapElXOrigin + parseInt(minimapEl.getAttribute('width')) 
     let minimapElMaxY = parseInt(minimapEl.getAttribute('y'))
     let pointsCount = chartData.columns[0].length - 1
+    let maxYDistance = Math.abs(minimapElMaxY - minimapElYOrigin) 
+    let maxXDistance = Math.abs(minimapElMaxX - minimapElXOrigin)
 
     let minimapChart = document.createElementNS(svgns, 'polyline')
-    minimapChart.setAttributeNS(null, 'id', 'polyLineMinimap')
+    minimapChart.setAttributeNS(null, 'id', 'polyLineMinimap1')
     minimapChart.setAttributeNS(null, 'fill', 'none')
     minimapChart.setAttributeNS(null, 'stroke', chartData.colors.y0)
     minimapChart.setAttributeNS(null, 'stroke-width', '2')
 
+    let minimapChart2 = document.createElementNS(svgns, 'polyline')
+    minimapChart2.setAttributeNS(null, 'id', 'polyLineMinimap2')
+    minimapChart2.setAttributeNS(null, 'fill', 'none')
+    minimapChart2.setAttributeNS(null, 'stroke', chartData.colors.y1)
+    minimapChart2.setAttributeNS(null, 'stroke-width', '2')
+
     let firstChartArray = chartData.columns[1]
+    let secondChartArray = chartData.columns[2]
     let maxFirstArray = Math.max.apply(null, firstChartArray.slice(1, firstChartArray.length -1));
-    let maxYDistance = Math.abs(minimapElMaxY - minimapElYOrigin) 
-    let maxXDistance = Math.abs(minimapElMaxX - minimapElXOrigin)
+    let maxSecondArray = Math.max.apply(null, firstChartArray.slice(1, secondChartArray.length -1));
+
     for (let i = 1; i < chartData.columns[0].length; i++) {
         let point = svg.createSVGPoint()
-        point.x = minimapElXOrigin + (i * maxXDistance)/pointsCount;
+        xcoord = minimapElXOrigin + (i * maxXDistance)/pointsCount
+        point.x = xcoord;
         point.y = minimapElYOrigin - (maxYDistance*firstChartArray[i])/maxFirstArray;
         minimapChart.points.appendItem(point);
+
+        let point2 = svg.createSVGPoint()
+        point2.x = xcoord;
+        point2.y = minimapElYOrigin - (maxYDistance*secondChartArray[i])/maxSecondArray;
+        minimapChart2.points.appendItem(point2);
     }
     svg.appendChild(minimapChart)
+    svg.appendChild(minimapChart2)
 
 }
