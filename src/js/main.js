@@ -4,6 +4,8 @@ const baseLineY = document.getElementById('baseLine').getAttribute('y1')
 const upperLineY = document.getElementById('upperLine').getAttribute('y1')
 const sampleChartEl = document.getElementById('sampleChart')
 const minimapElement = document.getElementById('minimap')
+const XminSvg = parseInt(document.getElementById('baseLine').getAttribute('x1'))
+const XmaxSvg = parseInt(document.getElementById('baseLine').getAttribute('x2'))
 
 document.addEventListener("DOMContentLoaded", function() {
     const buttonEl = document.getElementById('button')
@@ -12,7 +14,7 @@ document.addEventListener("DOMContentLoaded", function() {
     }
     svg.addEventListener('mousemove', drawVerticalLine, false);
     const data = getChartData(chartData)
-    // console.log(data)
+    console.log(data)
     //Drawing first minimap
     drawchartsForMinimap(data[0], minimapElement)
 });
@@ -78,17 +80,20 @@ let drawVerticalLine = function(e) {
     pt.x = e.clientX
     pt.y = e.clientY
     svgP = pt.matrixTransform(svg.getScreenCTM().inverse())
-    line = document.createElementNS(svgns,'line')
-    line.setAttribute('id', 'verticalLine')
-    line.setAttributeNS(null, 'id', 'verticalLine')
-    line.setAttributeNS(null, 'x1', svgP.x)
-    line.setAttributeNS(null, 'y1', upperLineY)
-    line.setAttributeNS(null, 'x2', svgP.x)
-    line.setAttributeNS(null, 'y2', baseLineY)
-    line.classList.add('grid')
-    svg.appendChild(line)    
-    if (sampleChartEl != null && intersectRect(line, sampleChartEl)) {
-        //There will be code about creating point of intersection
+    let svgPx = svgP.x
+    if (svgPx >= XminSvg && svgPx <= XmaxSvg) {
+        line = document.createElementNS(svgns,'line')
+        line.setAttribute('id', 'verticalLine')
+        line.setAttributeNS(null, 'id', 'verticalLine')
+        line.setAttributeNS(null, 'x1', svgPx)
+        line.setAttributeNS(null, 'y1', upperLineY)
+        line.setAttributeNS(null, 'x2', svgPx)
+        line.setAttributeNS(null, 'y2', baseLineY)
+        line.classList.add('grid')
+        svg.appendChild(line)    
+        if (sampleChartEl != null && intersectRect(line, sampleChartEl)) {
+            //There will be code about creating point of intersection
+        }
     }
 }
 
