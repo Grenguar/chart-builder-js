@@ -16,10 +16,8 @@ document.addEventListener("DOMContentLoaded", function() {
     }
     svg.addEventListener('mousemove', drawVerticalLine, false);
     let data = getFullFormattedData(getChartData(chartData))
-    console.log(data)
     //Draw big chart
-    // chartData, offsetX, offsetY, maxXDistance, maxYDistance)
-    drawCharts(data[0], XminSvg, YminSvg, XmaxSvg-XminSvg, YmaxSvg-YminSvg)
+    drawCharts(data[0], XminSvg, YmaxSvg, XmaxSvg-XminSvg, YmaxSvg-YminSvg)
     //Drawing first minimap
     drawChartsForMinimap(data[0], minimapElement)
 });
@@ -117,6 +115,11 @@ let getFormattedDataForOneChart = function(chartData) {
 /**
  * Drawing for Big chart
  */
+
+let drawBigCharts = function(chartData, svgEl) {
+
+}
+
 let drawVerticalLine = function(e) {
     let verticalLineEl = document.getElementById('verticalLine')
     if (verticalLineEl !== null) {
