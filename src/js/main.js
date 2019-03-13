@@ -123,36 +123,75 @@ let drawchartsForMinimap = function (chartData, minimapEl) {
     let maxYDistance = Math.abs(minimapElMaxY - minimapElYOrigin) 
     let maxXDistance = Math.abs(minimapElMaxX - minimapElXOrigin)
 
-    let minimapChart = document.createElementNS(svgns, 'polyline')
-    minimapChart.setAttributeNS(null, 'id', 'polyLineMinimap1')
-    minimapChart.setAttributeNS(null, 'fill', 'none')
-    minimapChart.setAttributeNS(null, 'stroke', chartData.colors.y0)
-    minimapChart.setAttributeNS(null, 'stroke-width', '2')
+    // let minimapChart = document.createElementNS(svgns, 'polyline')
+    // minimapChart.setAttributeNS(null, 'id', 'polyLineMinimap1')
+    // minimapChart.setAttributeNS(null, 'fill', 'none')
+    // minimapChart.setAttributeNS(null, 'stroke', 'black')
+    // minimapChart.setAttributeNS(null, 'stroke-width', '2')
 
-    let minimapChart2 = document.createElementNS(svgns, 'polyline')
-    minimapChart2.setAttributeNS(null, 'id', 'polyLineMinimap2')
-    minimapChart2.setAttributeNS(null, 'fill', 'none')
-    minimapChart2.setAttributeNS(null, 'stroke', chartData.colors.y1)
-    minimapChart2.setAttributeNS(null, 'stroke-width', '2')
+    // let minimapChart2 = document.createElementNS(svgns, 'polyline')
+    // minimapChart2.setAttributeNS(null, 'id', 'polyLineMinimap2')
+    // minimapChart2.setAttributeNS(null, 'fill', 'none')
+    // minimapChart2.setAttributeNS(null, 'stroke', 'yellow')
+    // minimapChart2.setAttributeNS(null, 'stroke-width', '2')
 
-    let firstChartArray = chartData.columns[1]
-    let secondChartArray = chartData.columns[2]
-    let maxFirstArray = Math.max.apply(null, firstChartArray.slice(1, firstChartArray.length -1));
-    let maxSecondArray = Math.max.apply(null, firstChartArray.slice(1, secondChartArray.length -1));
+    // let firstChartArray = chartData.columns[1]
+    // let secondChartArray = chartData.columns[2]
+    // let maxFirstArray = Math.max.apply(null, firstChartArray.slice(1, firstChartArray.length -1));
+    // let maxSecondArray = Math.max.apply(null, firstChartArray.slice(1, secondChartArray.length -1));
 
-    for (let i = 1; i < chartData.columns[0].length; i++) {
-        let point = svg.createSVGPoint()
-        xcoord = minimapElXOrigin + (i * maxXDistance)/pointsCount
-        point.x = xcoord;
-        point.y = minimapElYOrigin - (maxYDistance*firstChartArray[i])/maxFirstArray;
-        minimapChart.points.appendItem(point);
+    // for (let i = 1; i < chartData.columns[0].length; i++) {
+    //     let point = svg.createSVGPoint()
+    //     xcoord = minimapElXOrigin + (i * maxXDistance)/pointsCount
+    //     point.x = xcoord;
+    //     point.y = minimapElYOrigin - (maxYDistance*firstChartArray[i])/maxFirstArray;
+    //     minimapChart.points.appendItem(point);
 
-        let point2 = svg.createSVGPoint()
-        point2.x = xcoord;
-        point2.y = minimapElYOrigin - (maxYDistance*secondChartArray[i])/maxSecondArray;
-        minimapChart2.points.appendItem(point2);
+    //     let point2 = svg.createSVGPoint()
+    //     point2.x = xcoord;
+    //     point2.y = minimapElYOrigin - (maxYDistance*secondChartArray[i])/maxSecondArray;
+    //     minimapChart2.points.appendItem(point2);
+    // }
+    // svg.appendChild(minimapChart)
+    // svg.appendChild(minimapChart2)
+
+    
+    let counter = 0, yColumns = [], polylines = [], xPointCount = 0, yMaximums = []
+    while (counter < chartData.columns.length) {
+        let currentColumn = chartData.columns[counter]
+        let currentChartKey = currentColumn[0]
+        let currtype = chartData.types[currentChartKey]
+        if (currtype === "line") {
+            let currYColumn = currentColumn.slice(1, currentColumn.length)
+            yColumns.push(currYColumn)
+            yMaximums.push(Math.max.apply(null, currYColumn))
+            polylines.push(createBasicPolyLine(chartData.names[currentChartKey], chartData.colors[currentChartKey]))
+        } else {
+            xPointCount = currentColumn.length - 1
+        }
+        counter++
     }
-    svg.appendChild(minimapChart)
-    svg.appendChild(minimapChart2)
+    
+    for (let i = 0; i < yColumns.length; i++) {
+        let currentColumn = yColumns[i]
+        for (let j = 0; j < currentColumn.length; j++) {
+            let point = svg.createSVGPoint()
+            //TODO: Change calculating points! 
+            point.x = minimapElXOrigin + (j * maxXDistance)/xPointCount
+            point.y = minimapElYOrigin - maxYDistance * currentColumn[j]/yMaximums[i]
+            polylines[i].points.appendItem(point)
+        }
+        svg.appendChild(polylines[i])
+    }
+}
 
+
+
+let createBasicPolyLine = function(id, color) {
+    let minimapChart = document.createElementNS(svgns, 'polyline')
+    minimapChart.setAttributeNS(null, 'id', id)
+    minimapChart.setAttributeNS(null, 'fill', 'none')
+    minimapChart.setAttributeNS(null, 'stroke', color)
+    minimapChart.setAttributeNS(null, 'stroke-width', '1')
+    return minimapChart
 }
