@@ -6,6 +6,8 @@ const sampleChartEl = document.getElementById('sampleChart')
 const minimapElement = document.getElementById('minimap')
 const XminSvg = parseInt(document.getElementById('baseLine').getAttribute('x1'))
 const XmaxSvg = parseInt(document.getElementById('baseLine').getAttribute('x2'))
+const YminSvg = parseInt(document.getElementById('upperLine').getAttribute('y1'))
+const YmaxSvg = parseInt(document.getElementById('baseLine').getAttribute('y1'))
 
 document.addEventListener("DOMContentLoaded", function() {
     const buttonEl = document.getElementById('button')
@@ -13,14 +15,17 @@ document.addEventListener("DOMContentLoaded", function() {
         switchTheme()
     }
     svg.addEventListener('mousemove', drawVerticalLine, false);
-    const data = getChartData(chartData)
+    let data = getFullFormattedData(getChartData(chartData))
     console.log(data)
+    //Draw big chart
+    // chartData, offsetX, offsetY, maxXDistance, maxYDistance)
+    drawCharts(data[0], XminSvg, YminSvg, XmaxSvg-XminSvg, YmaxSvg-YminSvg)
     //Drawing first minimap
-    drawchartsForMinimap(data[0], minimapElement)
+    drawChartsForMinimap(data[0], minimapElement)
 });
 
 /**
- * Styling and themes
+ * Styling and themes utilities
  */
 let switchTheme = function() {
     let theme = "day"
@@ -64,12 +69,53 @@ let toggleClass = function(el, className) {
     }
 }
 
+/**
+ * Parsing data from JSON 
+ */
 let getChartData = function(object) {
     return JSON.parse(object)
 }
 
+let getFullFormattedData = function(data) {
+    let fullData = []
+    for (let l = 0; l < data.length; l++) {
+        fullData.push(getFormattedDataForOneChart(data[l]))
+    }
+    return fullData
+}
+
+let getFormattedDataForOneChart = function(chartData) {
+    let counter = 0, yColumns = [], xPointCount = 0, yMaximums = [], names = [], colors = [], xColumns = []
+    while (counter < chartData.columns.length) {
+        let currentColumn = chartData.columns[counter]
+        let currentChartKey = currentColumn[0]
+        let currtype = chartData.types[currentChartKey]
+        if (currtype === "line") {
+            let currYColumn = currentColumn.slice(1, currentColumn.length)
+            yColumns.push(currYColumn)
+            yMaximums.push(Math.max.apply(null, currYColumn))
+            names.push(chartData.names[currentChartKey])
+            colors.push(chartData.colors[currentChartKey])
+        } else {
+            xPointCount = currentColumn.length - 1
+            xColumns.push( currentColumn.slice(1, currentColumn.length) )
+        }
+        counter++
+    }
+    let yMax = Math.max.apply(null, yMaximums);
+    let formattedData = new Object()
+    formattedData.yColumns = yColumns
+    formattedData.xColumns = xColumns
+    formattedData.xPointCount = xPointCount
+    formattedData.yMaximums = yMaximums
+    formattedData.yMax = yMax
+    formattedData.names = names
+    formattedData.colors = colors
+    return formattedData
+}
+
 /**
- * Drawing for First chart
+ * Drawing for Big chart
  */
 let drawVerticalLine = function(e) {
     let verticalLineEl = document.getElementById('verticalLine')
@@ -81,7 +127,8 @@ let drawVerticalLine = function(e) {
     pt.y = e.clientY
     svgP = pt.matrixTransform(svg.getScreenCTM().inverse())
     let svgPx = svgP.x
-    if (svgPx >= XminSvg && svgPx <= XmaxSvg) {
+    let svgPy = svgP.y
+    if (isInsideSvgField(svgPx, svgPy, XminSvg, XmaxSvg, YminSvg, YmaxSvg)) {
         line = document.createElementNS(svgns,'line')
         line.setAttribute('id', 'verticalLine')
         line.setAttributeNS(null, 'id', 'verticalLine')
@@ -97,6 +144,10 @@ let drawVerticalLine = function(e) {
     }
 }
 
+let isInsideSvgField = function(svgPx, svgPy, XminSvg, XmaxSvg, YminSvg, YmaxSvg) {
+    return svgPx >= XminSvg && svgPx <= XmaxSvg && svgPy >= YminSvg && svgPy <= YmaxSvg
+}
+
 function intersectRect(r1, r2) {
     var r1 = r1.getBoundingClientRect();
     var r2 = r2.getBoundingClientRect();
@@ -109,83 +160,32 @@ function intersectRect(r1, r2) {
 /**
  * Drawing minimap charts
  */
-
-// function drawMinimap(data) {
-//     
-// }
-
-let drawchartsForMinimap = function (chartData, minimapEl) {
-    let minimapElXOrigin = parseInt(minimapEl.getAttribute('x'))
-    let minimapElYOrigin = parseInt(minimapEl.getAttribute('y')) + parseInt(minimapEl.getAttribute('height'))
-    let minimapElMaxX = minimapElXOrigin + parseInt(minimapEl.getAttribute('width')) 
-    let minimapElMaxY = parseInt(minimapEl.getAttribute('y'))
-    let pointsCount = chartData.columns[0].length - 1
-    let maxYDistance = Math.abs(minimapElMaxY - minimapElYOrigin) 
-    let maxXDistance = Math.abs(minimapElMaxX - minimapElXOrigin)
-
-    // let minimapChart = document.createElementNS(svgns, 'polyline')
-    // minimapChart.setAttributeNS(null, 'id', 'polyLineMinimap1')
-    // minimapChart.setAttributeNS(null, 'fill', 'none')
-    // minimapChart.setAttributeNS(null, 'stroke', 'black')
-    // minimapChart.setAttributeNS(null, 'stroke-width', '2')
-
-    // let minimapChart2 = document.createElementNS(svgns, 'polyline')
-    // minimapChart2.setAttributeNS(null, 'id', 'polyLineMinimap2')
-    // minimapChart2.setAttributeNS(null, 'fill', 'none')
-    // minimapChart2.setAttributeNS(null, 'stroke', 'yellow')
-    // minimapChart2.setAttributeNS(null, 'stroke-width', '2')
-
-    // let firstChartArray = chartData.columns[1]
-    // let secondChartArray = chartData.columns[2]
-    // let maxFirstArray = Math.max.apply(null, firstChartArray.slice(1, firstChartArray.length -1));
-    // let maxSecondArray = Math.max.apply(null, firstChartArray.slice(1, secondChartArray.length -1));
-
-    // for (let i = 1; i < chartData.columns[0].length; i++) {
-    //     let point = svg.createSVGPoint()
-    //     xcoord = minimapElXOrigin + (i * maxXDistance)/pointsCount
-    //     point.x = xcoord;
-    //     point.y = minimapElYOrigin - (maxYDistance*firstChartArray[i])/maxFirstArray;
-    //     minimapChart.points.appendItem(point);
-
-    //     let point2 = svg.createSVGPoint()
-    //     point2.x = xcoord;
-    //     point2.y = minimapElYOrigin - (maxYDistance*secondChartArray[i])/maxSecondArray;
-    //     minimapChart2.points.appendItem(point2);
-    // }
-    // svg.appendChild(minimapChart)
-    // svg.appendChild(minimapChart2)
-
-    
-    let counter = 0, yColumns = [], polylines = [], xPointCount = 0, yMaximums = []
-    while (counter < chartData.columns.length) {
-        let currentColumn = chartData.columns[counter]
-        let currentChartKey = currentColumn[0]
-        let currtype = chartData.types[currentChartKey]
-        if (currtype === "line") {
-            let currYColumn = currentColumn.slice(1, currentColumn.length)
-            yColumns.push(currYColumn)
-            yMaximums.push(Math.max.apply(null, currYColumn))
-            polylines.push(createBasicPolyLine(chartData.names[currentChartKey], chartData.colors[currentChartKey]))
-        } else {
-            xPointCount = currentColumn.length - 1
-        }
-        counter++
+let drawChartsForMinimap = function (chartData, minimapEl) {
+    const offsetX = parseInt(minimapEl.getAttribute('x'))
+    const offsetY = parseInt(minimapEl.getAttribute('y')) + parseInt(minimapEl.getAttribute('height'))
+    const minimapElMaxX = offsetX + parseInt(minimapEl.getAttribute('width')) 
+    const minimapElMaxY = parseInt(minimapEl.getAttribute('y'))
+    const maxYDistance = Math.abs(minimapElMaxY - offsetY) 
+    const maxXDistance = Math.abs(minimapElMaxX - offsetX)
+    for (let s = 0; s < chartData.names.length; s++) {
+        chartData.names[s] = "mini-" + chartData.names[s]
     }
-    
-    for (let i = 0; i < yColumns.length; i++) {
-        let currentColumn = yColumns[i]
-        for (let j = 0; j < currentColumn.length; j++) {
-            let point = svg.createSVGPoint()
-            //TODO: Change calculating points! 
-            point.x = minimapElXOrigin + (j * maxXDistance)/xPointCount
-            point.y = minimapElYOrigin - maxYDistance * currentColumn[j]/yMaximums[i]
-            polylines[i].points.appendItem(point)
-        }
-        svg.appendChild(polylines[i])
-    }
+    drawCharts(chartData, offsetX, offsetY, maxXDistance, maxYDistance)
 }
 
-
+let drawCharts = function(chartData, offsetX, offsetY, maxXDistance, maxYDistance) {
+    for (let i = 0; i < chartData.yColumns.length; i++) {
+        let currentColumn = chartData.yColumns[i]
+        let currPolyline = createBasicPolyLine(chartData.names[i], chartData.colors[i]);
+        for (let j = 0; j < currentColumn.length; j++) {
+            let point = svg.createSVGPoint()
+            point.x = offsetX + (j * maxXDistance)/chartData.xPointCount
+            point.y = offsetY - (maxYDistance*currentColumn[j])/chartData.yMax
+            currPolyline.points.appendItem(point)
+        }
+        svg.appendChild(currPolyline)
+    }
+}
 
 let createBasicPolyLine = function(id, color) {
     let minimapChart = document.createElementNS(svgns, 'polyline')
