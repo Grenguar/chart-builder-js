@@ -16,9 +16,7 @@ document.addEventListener("DOMContentLoaded", function() {
     }
     svg.addEventListener('mousemove', drawVerticalLine, false);
     let data = getFullFormattedData(getChartData(chartData))
-    //Draw big chart
-    drawCharts(data[0], XminSvg, YmaxSvg, XmaxSvg-XminSvg, YmaxSvg-YminSvg)
-    //Drawing first minimap
+    drawBigCharts(data[0], svg, XminSvg, YmaxSvg, XmaxSvg-XminSvg, YmaxSvg-YminSvg)
     drawChartsForMinimap(data[0], minimapElement)
 });
 
@@ -83,7 +81,7 @@ let getFullFormattedData = function(data) {
 }
 
 let getFormattedDataForOneChart = function(chartData) {
-    let counter = 0, yColumns = [], xPointCount = 0, yMaximums = [], names = [], colors = [], xColumns = []
+    let counter = 0, yColumns = [], xPointCount = 0, yMaximums = [], yMinimums = [], names = [], colors = [], xColumns = []
     while (counter < chartData.columns.length) {
         let currentColumn = chartData.columns[counter]
         let currentChartKey = currentColumn[0]
@@ -92,6 +90,7 @@ let getFormattedDataForOneChart = function(chartData) {
             let currYColumn = currentColumn.slice(1, currentColumn.length)
             yColumns.push(currYColumn)
             yMaximums.push(Math.max.apply(null, currYColumn))
+            yMinimums.push(Math.min.apply(null, currYColumn))
             names.push(chartData.names[currentChartKey])
             colors.push(chartData.colors[currentChartKey])
         } else {
@@ -101,12 +100,15 @@ let getFormattedDataForOneChart = function(chartData) {
         counter++
     }
     let yMax = Math.max.apply(null, yMaximums);
+    let yMin = Math.max.apply(null, yMinimums)
     let formattedData = new Object()
     formattedData.yColumns = yColumns
     formattedData.xColumns = xColumns
     formattedData.xPointCount = xPointCount
     formattedData.yMaximums = yMaximums
+    formattedData.yMinimums = yMinimums
     formattedData.yMax = yMax
+    formattedData.yMin = yMin
     formattedData.names = names
     formattedData.colors = colors
     return formattedData
@@ -115,9 +117,19 @@ let getFormattedDataForOneChart = function(chartData) {
 /**
  * Drawing for Big chart
  */
+let drawBigCharts = function(chartData, svg, XminSvg, YmaxSvg, maxXDistance, maxYDistance) {
+    drawCharts(chartData, XminSvg, YmaxSvg, maxXDistance, maxYDistance)
+    let yMin = 0
+    let yMax = chartData.yMax
 
-let drawBigCharts = function(chartData, svgEl) {
-
+    let textNodes = document.getElementById('ylabels').querySelectorAll('text')
+    let textNodesLength = textNodes.length
+    let xStep = Math.floor((yMax - yMin) / (textNodesLength-1) )
+    let valueForXaxis = 0
+    for (let i = 0; i < textNodesLength; i++) {
+        document.getElementById('ylabels').querySelectorAll('text')[textNodesLength - 1 - i].innerHTML = valueForXaxis
+        valueForXaxis += xStep
+    }
 }
 
 let drawVerticalLine = function(e) {
@@ -174,20 +186,47 @@ let drawChartsForMinimap = function (chartData, minimapEl) {
         chartData.names[s] = "mini-" + chartData.names[s]
     }
     drawCharts(chartData, offsetX, offsetY, maxXDistance, maxYDistance)
+    let defaultWidth = 10*calculateXStep(maxXDistance, chartData.xPointCount);
+    let rectangle = drawScalingRectangle(minimapElMaxX, minimapElMaxY, defaultWidth)
+    svg.appendChild(rectangle)
+}
+
+//<rect id ="minimap" class="day" x="30" y="520" width="500" height="80" style="stroke-width:3;" />
+
+let drawScalingRectangle = function(minimapElMaxX, minimapElMaxY, defaultWidth) {
+    let scalingRectangle = document.createElementNS(svgns, 'rect')
+    scalingRectangle.setAttributeNS(null, 'id', 'scalingRectangle')
+    //x, y should be vars
+    scalingRectangle.setAttributeNS(null, 'x', 330)
+    scalingRectangle.setAttributeNS(null, 'y', 522)
+    //width, heigth should be vars
+    scalingRectangle.setAttributeNS(null, 'width', 200)
+    scalingRectangle.setAttributeNS(null, 'height', 75)
+    scalingRectangle.setAttributeNS(null, 'rx', 10)
+    scalingRectangle.setAttributeNS(null, 'ry', 10)
+    scalingRectangle.setAttributeNS(null, 'stroke', '#CAD7E8')
+    scalingRectangle.setAttributeNS(null, 'style', 'stroke-width:3;')
+    return scalingRectangle
 }
 
 let drawCharts = function(chartData, offsetX, offsetY, maxXDistance, maxYDistance) {
     for (let i = 0; i < chartData.yColumns.length; i++) {
         let currentColumn = chartData.yColumns[i]
         let currPolyline = createBasicPolyLine(chartData.names[i], chartData.colors[i]);
+        let xStep = calculateXStep(maxXDistance, chartData.xPointCount)
+        let yStep = maxYDistance/chartData.yMax
         for (let j = 0; j < currentColumn.length; j++) {
             let point = svg.createSVGPoint()
-            point.x = offsetX + (j * maxXDistance)/chartData.xPointCount
-            point.y = offsetY - (maxYDistance*currentColumn[j])/chartData.yMax
+            point.x = offsetX + j * xStep
+            point.y = offsetY - currentColumn[j] * yStep
             currPolyline.points.appendItem(point)
         }
         svg.appendChild(currPolyline)
     }
+}
+
+let calculateXStep = function(maxXDistance, xPointCount) {
+    return maxXDistance/xPointCount
 }
 
 let createBasicPolyLine = function(id, color) {
