@@ -26,9 +26,18 @@
             <text x="30" y="475">0</text>
         </g>
         <g class="labels x-labels">
-          <!-- <text x="100" y="400">2008</text> -->
+        <!-- <text x="100" y="400">2008</text> -->
         </g>
-        <rect id ="minimap" class="day" x="30" y="520" width="500" height="80" style="stroke-width:3;" />
+
+
+        <rect id ="minimap" class="day" x="30" y="520" width="500" height="80" style="stroke-width:3;"/> 
+
+        <g id="scalingRectangle">
+          <rect id="bigRect" x="330" y="520" width="200" height="80" rx="10" ry="10" fill="#CAD7E8"/>
+          <rect id="smallRect" x="350" y="527" width="160" height="67" fill="#fff"/>
+        </g> 
+
+
     </svg>
     <div class="footer">
       <button id="button" class="button day">Switch to Night Mode</button>

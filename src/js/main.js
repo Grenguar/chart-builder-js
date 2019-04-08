@@ -4,26 +4,65 @@ const baseLineY = document.getElementById('baseLine').getAttribute('y1')
 const upperLineY = document.getElementById('upperLine').getAttribute('y1')
 const sampleChartEl = document.getElementById('sampleChart')
 const minimapElement = document.getElementById('minimap')
+const scalingRectangleElement = document.getElementById('scalingRectangle')
+const scalingRectangleBig = document.getElementById('bigRect')
+const scalingRectangleSmall = document.getElementById('smallRect')
+
 const XminSvg = parseInt(document.getElementById('baseLine').getAttribute('x1'))
 const XmaxSvg = parseInt(document.getElementById('baseLine').getAttribute('x2'))
 const YminSvg = parseInt(document.getElementById('upperLine').getAttribute('y1'))
 const YmaxSvg = parseInt(document.getElementById('baseLine').getAttribute('y1'))
 
-document.addEventListener("DOMContentLoaded", function() {
+document.addEventListener("DOMContentLoaded", () => {
     const buttonEl = document.getElementById('button')
-    buttonEl.onclick = function() {
-        switchTheme()
-    }
-    svg.addEventListener('mousemove', drawVerticalLine, false);
+    buttonEl.onclick = () => { switchTheme() }
+    svg.onmousemove = drawVerticalLine
+    dragElement(scalingRectangleElement)
     let data = getFullFormattedData(getChartData(chartData))
     drawBigCharts(data[0], svg, XminSvg, YmaxSvg, XmaxSvg-XminSvg, YmaxSvg-YminSvg)
-    drawChartsForMinimap(data[0], minimapElement)
+    drawMinimap(data[0], minimapElement)
 });
+
+let dragElement = (elmnt) => {
+    let pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0
+    elmnt.onmousedown = dragMouseDown
+    elmnt.ontouchstart = dragMouseDown
+  
+    function dragMouseDown(e) {
+      document.onmouseup = closeDragElement
+      document.onmousemove = elementDrag
+      document.ontouchend = closeDragElement
+      document.ontouchmove = elementDrag
+      let svgP = getSvgCoords(e) 
+      pos1 = svgP.x
+      pos2 = svgP.y
+    }
+  
+    function elementDrag(e) {
+      let svgP = getSvgCoords(e)
+      pos3 = svgP.x
+      pos4 = svgP.y
+    }
+  
+    function closeDragElement() {
+      // stop moving when mouse button is released:
+      document.onmouseup = null
+      document.onmousemove = null
+      document.ontouchend = null
+      document.ontouchmove = null
+      console.log(pos1 + ":" + pos2 + "; " + pos3 + ":" + pos4)
+      let offset = pos1 - pos3
+      let bigRectXNew = parseInt(scalingRectangleBig.getAttribute('x')) - offset
+      let smallRectXNew = parseInt(scalingRectangleSmall.getAttribute('x')) - offset
+      scalingRectangleBig.setAttribute('x', String(bigRectXNew))
+      scalingRectangleSmall.setAttribute('x', String(smallRectXNew))
+    }
+}
 
 /**
  * Styling and themes utilities
  */
-let switchTheme = function() {
+let switchTheme = () => {
     let theme = "day"
     let buttonElement = document.getElementById('button')
     let bodyElement = document.getElementById('body')
@@ -50,29 +89,29 @@ let switchTheme = function() {
     toggleClass(headerElement, theme)
 }
 
-let toggleClass = function(el, className) {
+let toggleClass = (el, className) => {
     if (el.classList) {
-        el.classList.toggle(className);
+        el.classList.toggle(className)
     } else {
-        let classes = el.className.split(' ');
-        let existingIndex = classes.indexOf(className);
+        let classes = el.className.split(' ')
+        let existingIndex = classes.indexOf(className)
         if (existingIndex >= 0) {
-            classes.splice(existingIndex, 1);
+            classes.splice(existingIndex, 1)
         } else {
-            classes.push(className);
+            classes.push(className)
         }
-        el.className = classes.join(' ');
+        el.className = classes.join(' ')
     }
 }
 
 /**
  * Parsing data from JSON 
  */
-let getChartData = function(object) {
+let getChartData = (object) => {
     return JSON.parse(object)
 }
 
-let getFullFormattedData = function(data) {
+let getFullFormattedData = (data) => {
     let fullData = []
     for (let l = 0; l < data.length; l++) {
         fullData.push(getFormattedDataForOneChart(data[l]))
@@ -80,7 +119,7 @@ let getFullFormattedData = function(data) {
     return fullData
 }
 
-let getFormattedDataForOneChart = function(chartData) {
+let getFormattedDataForOneChart = (chartData) => {
     let counter = 0, yColumns = [], xPointCount = 0, yMaximums = [], yMinimums = [], names = [], colors = [], xColumns = []
     while (counter < chartData.columns.length) {
         let currentColumn = chartData.columns[counter]
@@ -117,7 +156,7 @@ let getFormattedDataForOneChart = function(chartData) {
 /**
  * Drawing for Big chart
  */
-let drawBigCharts = function(chartData, svg, XminSvg, YmaxSvg, maxXDistance, maxYDistance) {
+let drawBigCharts = (chartData, svg, XminSvg, YmaxSvg, maxXDistance, maxYDistance) => {
     drawCharts(chartData, XminSvg, YmaxSvg, maxXDistance, maxYDistance)
     let yMin = 0
     let yMax = chartData.yMax
@@ -132,17 +171,15 @@ let drawBigCharts = function(chartData, svg, XminSvg, YmaxSvg, maxXDistance, max
     }
 }
 
-let drawVerticalLine = function(e) {
+let drawVerticalLine = (e) => {
     let verticalLineEl = document.getElementById('verticalLine')
     if (verticalLineEl !== null) {
         verticalLineEl.parentNode.removeChild(verticalLineEl)
     }
-    let pt = svg.createSVGPoint(), svgP, line
-    pt.x = e.clientX
-    pt.y = e.clientY
-    svgP = pt.matrixTransform(svg.getScreenCTM().inverse())
-    let svgPx = svgP.x
-    let svgPy = svgP.y
+    let line
+    let svgPoint = getSvgCoords(e)
+    let svgPx = svgPoint.x
+    let svgPy = svgPoint.y
     if (isInsideSvgField(svgPx, svgPy, XminSvg, XmaxSvg, YminSvg, YmaxSvg)) {
         line = document.createElementNS(svgns,'line')
         line.setAttribute('id', 'verticalLine')
@@ -159,23 +196,34 @@ let drawVerticalLine = function(e) {
     }
 }
 
-let isInsideSvgField = function(svgPx, svgPy, XminSvg, XmaxSvg, YminSvg, YmaxSvg) {
+let getSvgCoords = (e) => {
+    let pt = svg.createSVGPoint(), svgP
+    console.log(e.changedTouches)
+    pt.x = e.clientX || e.targetTouches[0].clientX
+    pt.y = e.clientY || e.targetTouches[0].clientY
+    console.log(pt.x + ":" + pt.y)
+    svgP = pt.matrixTransform(svg.getScreenCTM().inverse())
+    console.log(svgP)
+    return svgP
+}
+
+let isInsideSvgField = (svgPx, svgPy, XminSvg, XmaxSvg, YminSvg, YmaxSvg) => {
     return svgPx >= XminSvg && svgPx <= XmaxSvg && svgPy >= YminSvg && svgPy <= YmaxSvg
 }
 
-function intersectRect(r1, r2) {
-    var r1 = r1.getBoundingClientRect();
-    var r2 = r2.getBoundingClientRect();
+let intersectRect = (r1, r2) => {
+    var r1 = r1.getBoundingClientRect()
+    var r2 = r2.getBoundingClientRect()
     return !(r2.left > r1.right || 
            r2.right < r1.left || 
            r2.top > r1.bottom ||
-           r2.bottom < r1.top);
+           r2.bottom < r1.top)
 }
 
 /**
  * Drawing minimap charts
  */
-let drawChartsForMinimap = function (chartData, minimapEl) {
+let drawMinimap = (chartData, minimapEl) => {
     const offsetX = parseInt(minimapEl.getAttribute('x'))
     const offsetY = parseInt(minimapEl.getAttribute('y')) + parseInt(minimapEl.getAttribute('height'))
     const minimapElMaxX = offsetX + parseInt(minimapEl.getAttribute('width')) 
@@ -186,30 +234,9 @@ let drawChartsForMinimap = function (chartData, minimapEl) {
         chartData.names[s] = "mini-" + chartData.names[s]
     }
     drawCharts(chartData, offsetX, offsetY, maxXDistance, maxYDistance)
-    let defaultWidth = 10*calculateXStep(maxXDistance, chartData.xPointCount);
-    let rectangle = drawScalingRectangle(minimapElMaxX, minimapElMaxY, defaultWidth)
-    svg.appendChild(rectangle)
 }
 
-//<rect id ="minimap" class="day" x="30" y="520" width="500" height="80" style="stroke-width:3;" />
-
-let drawScalingRectangle = function(minimapElMaxX, minimapElMaxY, defaultWidth) {
-    let scalingRectangle = document.createElementNS(svgns, 'rect')
-    scalingRectangle.setAttributeNS(null, 'id', 'scalingRectangle')
-    //x, y should be vars
-    scalingRectangle.setAttributeNS(null, 'x', 330)
-    scalingRectangle.setAttributeNS(null, 'y', 522)
-    //width, heigth should be vars
-    scalingRectangle.setAttributeNS(null, 'width', 200)
-    scalingRectangle.setAttributeNS(null, 'height', 75)
-    scalingRectangle.setAttributeNS(null, 'rx', 10)
-    scalingRectangle.setAttributeNS(null, 'ry', 10)
-    scalingRectangle.setAttributeNS(null, 'stroke', '#CAD7E8')
-    scalingRectangle.setAttributeNS(null, 'style', 'stroke-width:3;')
-    return scalingRectangle
-}
-
-let drawCharts = function(chartData, offsetX, offsetY, maxXDistance, maxYDistance) {
+let drawCharts = (chartData, offsetX, offsetY, maxXDistance, maxYDistance) => {
     for (let i = 0; i < chartData.yColumns.length; i++) {
         let currentColumn = chartData.yColumns[i]
         let currPolyline = createBasicPolyLine(chartData.names[i], chartData.colors[i]);
@@ -225,11 +252,11 @@ let drawCharts = function(chartData, offsetX, offsetY, maxXDistance, maxYDistanc
     }
 }
 
-let calculateXStep = function(maxXDistance, xPointCount) {
+let calculateXStep = (maxXDistance, xPointCount) => {
     return maxXDistance/xPointCount
 }
 
-let createBasicPolyLine = function(id, color) {
+let createBasicPolyLine = (id, color) => {
     let minimapChart = document.createElementNS(svgns, 'polyline')
     minimapChart.setAttributeNS(null, 'id', id)
     minimapChart.setAttributeNS(null, 'fill', 'none')
