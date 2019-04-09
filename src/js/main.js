@@ -19,7 +19,7 @@ document.addEventListener("DOMContentLoaded", () => {
     svg.onmousemove = drawVerticalLine
     dragElement(scalingRectangleElement)
     let data = getFullFormattedData(getChartData(chartData))
-    drawBigCharts(data[0], svg, XminSvg, YmaxSvg, XmaxSvg-XminSvg, YmaxSvg-YminSvg)
+    // drawBigCharts(data[0], svg, XminSvg, YmaxSvg, XmaxSvg-XminSvg, YmaxSvg-YminSvg)
     drawMinimap(data[0], minimapElement)
 });
 
@@ -251,16 +251,13 @@ let drawMinimap = (chartData, minimapEl) => {
     const minimapElMaxY = parseInt(minimapEl.getAttribute('y'))
     const maxYDistance = Math.abs(minimapElMaxY - offsetY) 
     const maxXDistance = Math.abs(minimapElMaxX - offsetX)
-    for (let s = 0; s < chartData.names.length; s++) {
-        chartData.names[s] = "mini-" + chartData.names[s]
-    }
-    drawCharts(chartData, offsetX, offsetY, maxXDistance, maxYDistance)
+    drawMinimapCharts(chartData, offsetX, offsetY, maxXDistance, maxYDistance)
 }
 
-let drawCharts = (chartData, offsetX, offsetY, maxXDistance, maxYDistance) => {
+let drawMinimapCharts = (chartData, offsetX, offsetY, maxXDistance, maxYDistance) => {
     for (let i = 0; i < chartData.yColumns.length; i++) {
         let currentColumn = chartData.yColumns[i]
-        let currPolyline = createBasicPolyLine(chartData.names[i], chartData.colors[i]);
+        let currPolyline = createBasicPolyLine("mini-" +chartData.names[i], chartData.colors[i]);
         let xStep = calculateXStep(maxXDistance, chartData.xPointCount)
         let yStep = maxYDistance/chartData.yMax
         for (let j = 0; j < currentColumn.length; j++) {
@@ -271,6 +268,18 @@ let drawCharts = (chartData, offsetX, offsetY, maxXDistance, maxYDistance) => {
         }
         svg.appendChild(currPolyline)
     }
+}
+
+let drawBigChartsFromMinimap = (chartData) => {
+    console.log("drawBigChartsFromMinimap")
+    let scalingRectXmin = parseInt(scalingRectangleBig.getAttribute('x'))
+    let scalingRectXmax = scalingRectXmin + parseInt(scalingRectangleBig.getAttribute('width'))
+    //temporary here
+    const XminSvg = parseInt(document.getElementById('baseLine').getAttribute('x1'))
+    const XmaxSvg = parseInt(document.getElementById('baseLine').getAttribute('x2'))
+    const YminSvg = parseInt(document.getElementById('upperLine').getAttribute('y1'))
+    const YmaxSvg = parseInt(document.getElementById('baseLine').getAttribute('y1'))
+    
 }
 
 let calculateXStep = (maxXDistance, xPointCount) => {
