@@ -45,17 +45,27 @@ let dragElement = (elmnt) => {
     }
   
     function closeDragElement() {
-      // stop moving when mouse button is released:
       document.onmouseup = null
       document.onmousemove = null
       document.ontouchend = null
       document.ontouchmove = null
-      console.log(pos1 + ":" + pos2 + "; " + pos3 + ":" + pos4)
       let offset = pos1 - pos3
       let bigRectXNew = parseInt(scalingRectangleBig.getAttribute('x')) - offset
+      let bigRectWidth = parseInt(scalingRectangleBig.getAttribute('width'))
+      let bigRectMaxXNew = bigRectXNew + bigRectWidth
       let smallRectXNew = parseInt(scalingRectangleSmall.getAttribute('x')) - offset
-      scalingRectangleBig.setAttribute('x', String(bigRectXNew))
-      scalingRectangleSmall.setAttribute('x', String(smallRectXNew))
+      let minimapStartXCoord = parseInt(minimapElement.getAttribute('x'))
+      let minimapEndXCoord = parseInt(minimapElement.getAttribute('x')) + parseInt(minimapElement.getAttribute('width'))
+      if (bigRectXNew <= minimapStartXCoord) {
+        scalingRectangleBig.setAttribute('x', String(minimapStartXCoord))
+        scalingRectangleSmall.setAttribute('x', String(minimapStartXCoord + 20))
+      } else if (bigRectMaxXNew >= minimapEndXCoord) {
+        scalingRectangleBig.setAttribute('x', String(minimapEndXCoord - bigRectWidth))
+        scalingRectangleSmall.setAttribute('x', String(minimapEndXCoord - bigRectWidth + 20))
+      } else {
+        scalingRectangleBig.setAttribute('x', String(bigRectXNew))
+        scalingRectangleSmall.setAttribute('x', String(smallRectXNew))
+      }
     }
 }
 
@@ -102,6 +112,20 @@ let toggleClass = (el, className) => {
         }
         el.className = classes.join(' ')
     }
+}
+
+function animateCSS(element, animationName, callback) {
+    const node = document.querySelector(element)
+    node.classList.add('animated', animationName)
+
+    function handleAnimationEnd() {
+        // node.classList.remove('animated', animationName)
+        node.removeEventListener('animationend', handleAnimationEnd)
+
+        if (typeof callback === 'function') callback()
+    }
+
+    node.addEventListener('animationend', handleAnimationEnd)
 }
 
 /**
@@ -198,12 +222,9 @@ let drawVerticalLine = (e) => {
 
 let getSvgCoords = (e) => {
     let pt = svg.createSVGPoint(), svgP
-    console.log(e.changedTouches)
     pt.x = e.clientX || e.targetTouches[0].clientX
     pt.y = e.clientY || e.targetTouches[0].clientY
-    console.log(pt.x + ":" + pt.y)
     svgP = pt.matrixTransform(svg.getScreenCTM().inverse())
-    console.log(svgP)
     return svgP
 }
 
