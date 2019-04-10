@@ -27,7 +27,6 @@ document.addEventListener("DOMContentLoaded", () => {
 })
 
 let makeChartAreaScrollable = () => {
-    const scrollBarWidth = 8
     let scrollDistance = 0
     let scrollDistanceX = 0
     const root = chartArea
@@ -71,14 +70,14 @@ let makeChartAreaScrollable = () => {
     const absoluteContentWidth = contentBBox.x + contentBBox.width
     const maxScrollX = Math.max(absoluteContentWidth - rootBBox.width, 0)
   
-    function updateScrollPosition(diff) {
+    let updateScrollPosition = (diff) => {
         scrollDistance += diff
         scrollDistance = Math.max(0, scrollDistance)
         scrollDistance = Math.min(maxScroll, scrollDistance)
         content.setAttributeNS(null, 'transform', `translate(${rootBBox.x},${rootBBox.y-scrollDistance})`)
     }
 
-    function updateScrollPositionX(diff) {
+    let updateScrollPositionX = (diff) => {
         scrollDistanceX += diff
         scrollDistanceX = Math.max(0, scrollDistanceX)
         scrollDistanceX = Math.min(maxScrollX, scrollDistanceX)
@@ -87,10 +86,10 @@ let makeChartAreaScrollable = () => {
 
     // Set up scroll events
     // root.onwheel = (e) => updateScrollPosition(e.deltaY)
-    function observeChanges(targetNode, callback) {
+    observeChanges = (targetNode, callback) => {
         const config = { attributes: true, attributeOldValue: true}
-        callback = function(mutationsList, observer) {
-            for(var mutation of mutationsList) {
+        callback = function(mutationsList) {
+            for (let mutation of mutationsList) {
                 if (mutation.type == 'attributes') {
                     let newValue = targetNode.getAttribute(mutation.attributeName)
                     let oldValue = mutation.oldValue
@@ -98,7 +97,7 @@ let makeChartAreaScrollable = () => {
                     updateScrollPositionX(difference)
                 }
             }
-        };
+        }
         let observer = new MutationObserver(callback)
         observer.observe(targetNode, config)
     }
