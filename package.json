@@ -1,0 +1,29 @@
+{
+  "name": "chart-builder",
+  "version": "0.0.2",
+  "description": "Chart builder",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "webpack --mode=development",
+    "start": "webpack-dev-server --inline --hot --config webpack.config.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Grenguar/chart-builder-js.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Grenguar/chart-builder-js/issues"
+  },
+  "homepage": "https://github.com/Grenguar/chart-builder-js#readme",
+  "devDependencies": {
+    "uglifyjs-webpack-plugin": "^2.1.2",
+    "webpack-cli": "^3.3.0",
+    "webpack-dev-server": "^3.3.1"
+  },
+  "dependencies": {
+    "webpack": "^4.29.6"
+  }
+}

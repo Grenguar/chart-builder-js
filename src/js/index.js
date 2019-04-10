@@ -1,3 +1,6 @@
+import { ChartData } from './chartData'
+
+const chartData = new ChartData()
 const svgns = "http://www.w3.org/2000/svg"
 const svg = document.getElementById('chart')
 const chartArea = document.getElementById('chartArea')
@@ -20,7 +23,7 @@ document.addEventListener("DOMContentLoaded", () => {
     makeChartAreaScrollable()
     svg.onmousemove = drawVerticalLine
     dragElement(scalingRectangleElement)
-    let data = getFullFormattedData(getChartData(chartData))
+    let data = getFullFormattedData(JSON.parse(chartData.getChartData()))
     // drawBigCharts(data[0], svg, XminSvg, YmaxSvg, XmaxSvg-XminSvg, YmaxSvg-YminSvg)
     drawMinimap(data[0], minimapElement)
     drawBigChartsFromMinimap(data[0])
@@ -70,7 +73,7 @@ let makeChartAreaScrollable = () => {
     const absoluteContentWidth = contentBBox.x + contentBBox.width
     const maxScrollX = Math.max(absoluteContentWidth - rootBBox.width, 0)
   
-    let updateScrollPosition = (diff) => {
+    let updateScrollPositionY = (diff) => {
         scrollDistance += diff
         scrollDistance = Math.max(0, scrollDistance)
         scrollDistance = Math.min(maxScroll, scrollDistance)
@@ -85,8 +88,8 @@ let makeChartAreaScrollable = () => {
     } 
 
     // Set up scroll events
-    // root.onwheel = (e) => updateScrollPosition(e.deltaY)
-    observeChanges = (targetNode, callback) => {
+    // root.onwheel = (e) => updateScrollPositionY(e.deltaY)
+    let observeChanges = (targetNode, callback) => {
         const config = { attributes: true, attributeOldValue: true}
         callback = function(mutationsList) {
             for (let mutation of mutationsList) {
@@ -390,7 +393,6 @@ let findClosest = (arr, target) => {
     } 
     return arr[mid] 
 } 
-
 
 let calculateXStep = (maxXDistance, xPointCount) => {
     return maxXDistance/xPointCount
