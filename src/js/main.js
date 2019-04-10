@@ -70,7 +70,7 @@ let makeChartAreaScrollable = () => {
     const absoluteContentWidth = contentBBox.x + contentBBox.width
     const maxScrollX = Math.max(absoluteContentWidth - rootBBox.width, 0)
   
-    let updateScrollPosition = (diff) => {
+    let updateScrollPositionY = (diff) => {
         scrollDistance += diff
         scrollDistance = Math.max(0, scrollDistance)
         scrollDistance = Math.min(maxScroll, scrollDistance)
@@ -85,7 +85,7 @@ let makeChartAreaScrollable = () => {
     } 
 
     // Set up scroll events
-    // root.onwheel = (e) => updateScrollPosition(e.deltaY)
+    // root.onwheel = (e) => updateScrollPositionY(e.deltaY)
     observeChanges = (targetNode, callback) => {
         const config = { attributes: true, attributeOldValue: true}
         callback = function(mutationsList) {
