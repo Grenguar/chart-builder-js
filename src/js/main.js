@@ -1,5 +1,6 @@
 const svgns = "http://www.w3.org/2000/svg"
 const svg = document.getElementById('chart')
+const chartArea = document.getElementById('chartArea')
 const baseLineY = document.getElementById('baseLine').getAttribute('y1')
 const upperLineY = document.getElementById('upperLine').getAttribute('y1')
 const sampleChartEl = document.getElementById('sampleChart')
@@ -16,12 +17,95 @@ const YmaxSvg = parseInt(document.getElementById('baseLine').getAttribute('y1'))
 document.addEventListener("DOMContentLoaded", () => {
     const buttonEl = document.getElementById('button')
     buttonEl.onclick = () => { switchTheme() }
+    makeChartAreaScrollable()
     svg.onmousemove = drawVerticalLine
     dragElement(scalingRectangleElement)
     let data = getFullFormattedData(getChartData(chartData))
     // drawBigCharts(data[0], svg, XminSvg, YmaxSvg, XmaxSvg-XminSvg, YmaxSvg-YminSvg)
     drawMinimap(data[0], minimapElement)
-});
+    drawBigChartsFromMinimap(data[0])
+})
+
+let makeChartAreaScrollable = () => {
+    const scrollBarWidth = 8
+    let scrollDistance = 0
+    let scrollDistanceX = 0
+    const root = chartArea
+    const parent = root.parentNode
+    root.setAttribute("clip-path", "url(#chartArea-clip-path)")
+    const rootBBox = {
+        x: parseInt(chartArea.getAttribute("x")),
+        y: parseInt(chartArea.getAttribute("y")),
+        width: parseInt(chartArea.getAttribute("width")),
+        height: parseInt(chartArea.getAttribute("height"))
+    }
+    const contentItems = chartArea.children
+    const content = document.createElementNS(svgns, "g")
+    content.setAttributeNS(null, 'id', 'content')
+    content.setAttributeNS(null, 'transform', `translate(${rootBBox.x},${rootBBox.y})`)
+    Array.from(contentItems).forEach(function (child) {
+        content.appendChild(child)
+    });
+    root.appendChild(content)
+
+    const clipPath = document.createElementNS(svgns, 'clipPath')
+    clipPath.setAttributeNS(null, 'id', 'chartArea-clip-path')
+    parent.appendChild(clipPath)
+    const clipRect = document.createElementNS(svgns, "rect")
+    clipRect.setAttributeNS(null, 'x', rootBBox.x)
+    clipRect.setAttributeNS(null, 'y', rootBBox.y)
+    clipRect.setAttributeNS(null, 'width', rootBBox.width)
+    clipRect.setAttributeNS(null, 'height', rootBBox.height)
+    clipPath.appendChild(clipRect)
+    const invisibleLine = document.createElementNS(svgns, 'g')
+    invisibleLine.setAttributeNS(null, 'x', rootBBox.x)
+    invisibleLine.setAttributeNS(null, 'y', rootBBox.y)
+    invisibleLine.setAttributeNS(null, 'width', rootBBox.width)
+    invisibleLine.setAttributeNS(null, 'height', rootBBox.height)
+    invisibleLine.setAttributeNS(null, 'opacity', '0')
+    root.insertBefore(invisibleLine, content)
+    const contentBBox = content.getBBox() 
+    const absoluteContentHeight = contentBBox.y + contentBBox.height
+    const maxScroll = Math.max(absoluteContentHeight - rootBBox.height, 0)
+
+    const absoluteContentWidth = contentBBox.x + contentBBox.width
+    const maxScrollX = Math.max(absoluteContentWidth - rootBBox.width, 0)
+  
+    function updateScrollPosition(diff) {
+        scrollDistance += diff
+        scrollDistance = Math.max(0, scrollDistance)
+        scrollDistance = Math.min(maxScroll, scrollDistance)
+        content.setAttributeNS(null, 'transform', `translate(${rootBBox.x},${rootBBox.y-scrollDistance})`)
+    }
+
+    function updateScrollPositionX(diff) {
+        scrollDistanceX += diff
+        scrollDistanceX = Math.max(0, scrollDistanceX)
+        scrollDistanceX = Math.min(maxScrollX, scrollDistanceX)
+        content.setAttributeNS(null, 'transform', `translate(${rootBBox.x-scrollDistanceX},${rootBBox.y})`)
+    } 
+
+    // Set up scroll events
+    // root.onwheel = (e) => updateScrollPosition(e.deltaY)
+    function observeChanges(targetNode, callback) {
+        const config = { attributes: true, attributeOldValue: true}
+        callback = function(mutationsList, observer) {
+            for(var mutation of mutationsList) {
+                if (mutation.type == 'attributes') {
+                    let newValue = targetNode.getAttribute(mutation.attributeName)
+                    let oldValue = mutation.oldValue
+                    let difference = newValue - oldValue
+                    updateScrollPositionX(difference)
+                }
+            }
+        };
+        let observer = new MutationObserver(callback)
+        observer.observe(targetNode, config)
+    }
+    observeChanges(scalingRectangleBig)
+}
+
+
 
 let dragElement = (elmnt) => {
     let pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0
@@ -204,6 +288,7 @@ let drawVerticalLine = (e) => {
     let svgPoint = getSvgCoords(e)
     let svgPx = svgPoint.x
     let svgPy = svgPoint.y
+    // console.log(svgPoint)
     if (isInsideSvgField(svgPx, svgPy, XminSvg, XmaxSvg, YminSvg, YmaxSvg)) {
         line = document.createElementNS(svgns,'line')
         line.setAttribute('id', 'verticalLine')
@@ -213,7 +298,7 @@ let drawVerticalLine = (e) => {
         line.setAttributeNS(null, 'x2', svgPx)
         line.setAttributeNS(null, 'y2', baseLineY)
         line.classList.add('grid')
-        svg.appendChild(line)    
+        chartArea.appendChild(line)    
         if (sampleChartEl != null && intersectRect(line, sampleChartEl)) {
             //There will be code about creating point of intersection
         }
@@ -271,7 +356,6 @@ let drawMinimapCharts = (chartData, offsetX, offsetY, maxXDistance, maxYDistance
 }
 
 let drawBigChartsFromMinimap = (chartData) => {
-    console.log("drawBigChartsFromMinimap")
     let scalingRectXmin = parseInt(scalingRectangleBig.getAttribute('x'))
     let scalingRectXmax = scalingRectXmin + parseInt(scalingRectangleBig.getAttribute('width'))
     //temporary here
@@ -279,8 +363,35 @@ let drawBigChartsFromMinimap = (chartData) => {
     const XmaxSvg = parseInt(document.getElementById('baseLine').getAttribute('x2'))
     const YminSvg = parseInt(document.getElementById('upperLine').getAttribute('y1'))
     const YmaxSvg = parseInt(document.getElementById('baseLine').getAttribute('y1'))
-    
 }
+
+let findClosest = (arr, target) => { 
+    let n = arr.length
+    if (target <= arr[0]) 
+        return arr[0] 
+    if (target >= arr[n - 1]) 
+        return arr[n - 1]
+    let i = 0, j = n, mid = 0
+    while (i < j) { 
+        mid = (i + j) / 2 
+        if (arr[mid] == target) 
+            return arr[mid] 
+        if (target < arr[mid]) { 
+            if (mid > 0 && target > arr[mid - 1])  
+                return getClosest(arr[mid - 1],  
+                              arr[mid], target) 
+            j = mid               
+        } 
+        else { 
+            if (mid < n-1 && target < arr[mid + 1])  
+                return getClosest(arr[mid],  
+                      arr[mid + 1], target)                 
+            i = mid + 1 // update i 
+        } 
+    } 
+    return arr[mid] 
+} 
+
 
 let calculateXStep = (maxXDistance, xPointCount) => {
     return maxXDistance/xPointCount
