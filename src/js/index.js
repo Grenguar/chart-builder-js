@@ -1,6 +1,8 @@
 import { ChartData } from './chartData'
+import { Utils } from './utils'
 
 const chartData = new ChartData()
+const utils = new Utils()
 const svgns = "http://www.w3.org/2000/svg"
 const svg = document.getElementById('chart')
 const chartArea = document.getElementById('chartArea')
@@ -19,7 +21,11 @@ const YmaxSvg = parseInt(document.getElementById('baseLine').getAttribute('y1'))
 
 document.addEventListener("DOMContentLoaded", () => {
     const buttonEl = document.getElementById('button')
-    buttonEl.onclick = () => { switchTheme() }
+    buttonEl.onclick = () => { 
+        utils.switchTheme('night') 
+        //hack to reattach listeners
+        dragElement(scalingRectangleElement)
+    }
     makeChartAreaScrollable()
     svg.onmousemove = drawVerticalLine
     dragElement(scalingRectangleElement)
@@ -152,51 +158,6 @@ let dragElement = (elmnt) => {
         scalingRectangleBig.setAttribute('x', String(bigRectXNew))
         scalingRectangleSmall.setAttribute('x', String(smallRectXNew))
       }
-    }
-}
-
-/**
- * Styling and themes utilities
- */
-let switchTheme = () => {
-    let theme = "day"
-    let buttonElement = document.getElementById('button')
-    let bodyElement = document.getElementById('body')
-    let minimapElement = document.getElementById('minimap')
-    let headerElement = document.getElementById('header')
-    if (buttonElement.innerText.indexOf("Night") === -1) {
-        buttonElement.innerText = "Switch to Night Mode"
-        theme = "night"
-        toggleClass(buttonElement, "day")
-        toggleClass(bodyElement, "day")
-        toggleClass(minimapElement, "day")
-        toggleClass(headerElement, "day")
-    } else {
-        buttonElement.innerText = "Switch to Day Mode"
-        theme = "day"
-        toggleClass(buttonElement, "night")
-        toggleClass(bodyElement, "night")
-        toggleClass(minimapElement, "night")
-        toggleClass(headerElement, "night")
-    }
-    toggleClass(buttonElement, theme)
-    toggleClass(bodyElement, theme)
-    toggleClass(minimapElement, theme)
-    toggleClass(headerElement, theme)
-}
-
-let toggleClass = (el, className) => {
-    if (el.classList) {
-        el.classList.toggle(className)
-    } else {
-        let classes = el.className.split(' ')
-        let existingIndex = classes.indexOf(className)
-        if (existingIndex >= 0) {
-            classes.splice(existingIndex, 1)
-        } else {
-            classes.push(className)
-        }
-        el.className = classes.join(' ')
     }
 }
 
