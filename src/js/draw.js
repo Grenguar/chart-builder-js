@@ -88,7 +88,7 @@ export class Draw {
         const contentItems = chartArea.children
         const content = document.createElementNS(svgns, "g")
         content.setAttributeNS(null, 'id', 'content')
-        content.setAttributeNS(null, 'class', 'content')
+        content.setAttributeNS(null, 'class', 'content sliding')
         content.setAttributeNS(null, 'transform', `translate(${rootBBox.x},${rootBBox.y})`)
         Utils.makeArray(contentItems).forEach((child) => {
             content.appendChild(child)
@@ -208,18 +208,17 @@ export class Draw {
         const baseLineEl = this.__gridX.getElementsByClassName('baseLine')[0]
         let baseLineElY = parseFloat(baseLineEl.getAttribute('y1'))
         let baseLineElX = parseFloat(baseLineEl.getAttribute('x1'))
-        let minimapElY = parseFloat(this.minimapEl.getAttribute('y')) + parseFloat(this.minimapEl.getAttribute('height'))
+        let minimapWidth = parseFloat(this.minimapEl.getAttribute('height'))
+        let minimapElY = parseFloat(this.minimapEl.getAttribute('y')) + minimapWidth
         let polyLineOffset = baseLineElY - minimapElY
         let content = this.__chartArea.getElementsByClassName('content')[0]
         for (let i = 0; i < polylines.length; i++) {
             let newPolyline = polylines[i].cloneNode(true)
             newPolyline.setAttributeNS(null, 'class', 'bigChart')
             newPolyline.setAttributeNS(null, 'id', newPolyline.getAttribute('id').replace('mini', 'big'))
-            //TODO: Get proper translating and scaling, add sliding
             newPolyline.setAttributeNS(null, 'transform', `translate(${-baseLineElX},${polyLineOffset}) scale(2, 1)`)
             content.appendChild(newPolyline)
         }
-
     }
 }
 
