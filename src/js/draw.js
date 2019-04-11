@@ -210,10 +210,7 @@ export class Draw {
         let baseLineElX = parseFloat(baseLineEl.getAttribute('x1'))
         let minimapElY = parseFloat(this.minimapEl.getAttribute('y')) + parseFloat(this.minimapEl.getAttribute('height'))
         let polyLineOffset = baseLineElY - minimapElY
-        console.log("baseLine: " + baseLineElY + " minimap: " + minimapElY)
         let content = this.__chartArea.getElementsByClassName('content')[0]
-        console.log("OFFSET: " + polyLineOffset)
-
         for (let i = 0; i < polylines.length; i++) {
             let newPolyline = polylines[i].cloneNode(true)
             newPolyline.setAttributeNS(null, 'class', 'bigChart')
