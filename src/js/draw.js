@@ -208,15 +208,24 @@ export class Draw {
         const baseLineEl = this.__gridX.getElementsByClassName('baseLine')[0]
         let baseLineElY = parseFloat(baseLineEl.getAttribute('y1'))
         let baseLineElX = parseFloat(baseLineEl.getAttribute('x1'))
-        let minimapWidth = parseFloat(this.minimapEl.getAttribute('height'))
-        let minimapElY = parseFloat(this.minimapEl.getAttribute('y')) + minimapWidth
+        let minimapHeight = parseFloat(this.minimapEl.getAttribute('height'))
+        let scalingRectangleWidth = parseFloat(this.__scalingRectangleBig.getAttribute('width'))
+        let baseLineElX2 = parseFloat(baseLineEl.getAttribute('x2'))
+        let baselineWidth = baseLineElX2 - baseLineElX
+        let xRatio = baselineWidth/scalingRectangleWidth
+        let upperLineEl = this.__gridX.getElementsByClassName('upperLine')[0]
+        let upperLineElY = parseFloat(upperLineEl.getAttribute('y1'))
+        let chartHeight = baseLineElY - upperLineElY
+        let yRatio = chartHeight/minimapHeight
+
+        let minimapElY = parseFloat(this.minimapEl.getAttribute('y')) + minimapHeight
         let polyLineOffset = baseLineElY - minimapElY
         let content = this.__chartArea.getElementsByClassName('content')[0]
         for (let i = 0; i < polylines.length; i++) {
             let newPolyline = polylines[i].cloneNode(true)
             newPolyline.setAttributeNS(null, 'class', 'bigChart')
             newPolyline.setAttributeNS(null, 'id', newPolyline.getAttribute('id').replace('mini', 'big'))
-            newPolyline.setAttributeNS(null, 'transform', `translate(${-baseLineElX},${polyLineOffset}) scale(2, 1)`)
+            newPolyline.setAttributeNS(null, 'transform', `translate(0, ${polyLineOffset}) translate(30, 485) scale(${xRatio}, 1) translate(-30, -485)`)
             content.appendChild(newPolyline)
         }
     }
