@@ -23,5 +23,5 @@ document.addEventListener("DOMContentLoaded", () => {
     buttonEl.onclick = () => {utils.switchTheme()}
     
     new Minimap(data[0], minimapElement)
-    draw.drawBigChart()
+    draw.drawBigCharts()
 })
