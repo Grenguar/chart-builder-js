@@ -11,7 +11,8 @@ const bigChartElement = document.getElementById('bigChart')
 
 const chartData = new ChartData()
 const utils = new Utils()
-const draw = new Draw(bigChartElement, minimapElement, scalingRectangleElement)
+let data = chartData.getFullFormattedData()
+const draw = new Draw(bigChartElement, minimapElement, scalingRectangleElement, data[0])
 
 const buttonEl = document.getElementById('button')
 
@@ -20,7 +21,7 @@ document.addEventListener("DOMContentLoaded", () => {
     draw.makeChartAreaScrollable()
     svg.onmousemove = (e) => {draw.drawVerticalLine(e)}
     buttonEl.onclick = () => {utils.switchTheme()}
-    let data = chartData.getFullFormattedData()
+    
     new Minimap(data[0], minimapElement)
     draw.drawBigChart()
 })

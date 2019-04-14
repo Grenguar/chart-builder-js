@@ -7,11 +7,12 @@
     <link rel="stylesheet" href="src/css/style.css" type="text/css">
   </head>
   <body id="body" class="day">
-    <h2 id="header" class="day">Chart #1</h2>
+    <!-- <h2 id="header" class="day"></h2> -->
     <svg id="chart" class="graph" xmlns="http://www.w3.org/2000/svg" version="1.1" viewbox="0 0 600 900" width="100%" height="100%" preserveAspectRatio="xMidYMid meet"  role="img">
+        <text x="30" y="30" fill="black">Chart #1</text>
         <g id="bigChart" x="0" y="0" width="600" height="500">
             <g id="chartArea" class="chartArea" x="0" y="0" width="560" height="500">
-              <line x1="-100" y1="300" x2="2000" y2="300" fill="black" stroke="black"/>
+              <line id="scrollLine" x1="30" y1="300" x2="1300" y2="300" fill="transparent" stroke="transparent"/>
             </g>
             <g id="xGrid" class="grid x-grid">
               <line id="baseLine" class="baseLine" x1="30" y1="485" x2="530" y2="485"/> <!-- zero line -->
@@ -22,12 +23,12 @@
               <line id="upperLine" class="upperLine" x1="30" y1="65" x2="530" y2="65"/> 
             </g>
             <g id="ylabels" class="labels y-labels">
-                <text x="30" y="55">250</text>
+                <!-- <text x="30" y="55">250</text>
                 <text x="30" y="155">200</text>
                 <text x="30" y="235">150</text>
                 <text x="30" y="315">100</text>
                 <text x="30" y="395">50</text>
-                <text x="30" y="475">0</text>
+                <text x="30" y="475">0</text> -->
             </g>
             <g class="labels x-labels">
               <!-- <text x="100" y="400">2008</text> -->

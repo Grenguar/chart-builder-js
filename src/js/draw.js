@@ -4,10 +4,11 @@ import { Utils } from "./utils";
 
 export class Draw {
 
-    constructor(bigChartEl, minimapEl, scalingRectangleEl) {
+    constructor(bigChartEl, minimapEl, scalingRectangleEl, chartData) {
         this.bigChartEl = bigChartEl
         this.minimapEl = minimapEl
         this.scalingRectangleEl = scalingRectangleEl
+        this.chartData = chartData
         this.__svg = this.bigChartEl.parentNode
         //private methods
         getMinicharts.bind(this)
@@ -16,6 +17,9 @@ export class Draw {
         this.__scalingRectangleSmall = this.scalingRectangleEl.getElementsByClassName('smallRect')[0]
         this.__chartArea = this.bigChartEl.getElementsByClassName('chartArea')[0]
         this.__gridX = this.bigChartEl.getElementsByClassName('x-grid')[0]
+        this.__minimapWidth = this.minimapEl.getAttribute('width'),
+        this.__scalingRectWidth = this.__scalingRectangleBig.getAttribute('width'),
+        this.__xScalingFactor = Calc.roundBy(this.__minimapWidth/this.__scalingRectWidth, 2)
     }
 
     static createBasicPolyLine(id, color) {
@@ -23,7 +27,7 @@ export class Draw {
         line.setAttributeNS(null, 'id', id)
         line.setAttributeNS(null, 'fill', 'none')
         line.setAttributeNS(null, 'stroke', color)
-        line.setAttributeNS(null, 'stroke-width', '1')
+        line.setAttributeNS(null, 'stroke-width', '2')
         return line
     }
 
@@ -125,13 +129,13 @@ export class Draw {
         }
     
         let updateScrollPositionX = (diff) => {
-            scrollDistanceX += diff
+            scrollDistanceX += diff *  this.__xScalingFactor
             scrollDistanceX = Math.max(0, scrollDistanceX)
             scrollDistanceX = Math.min(maxScrollX, scrollDistanceX)
             content.setAttributeNS(null, 'transform', `translate(${rootBBox.x-scrollDistanceX},${rootBBox.y})`)
         } 
         let observeChanges = (targetNode, callback) => {
-            const config = { attributes: true, attributeOldValue: true}
+            const config = { attributes: true, attributeOldValue: true} 
             callback = function(mutationsList) {
                 for (let mutation of mutationsList) {
                     if (mutation.type == 'attributes') {
@@ -203,30 +207,33 @@ export class Draw {
         }
     }
 
-    drawBigChart() {
-        const polylines = getMinicharts(this.__svg)
-        const baseLineEl = this.__gridX.getElementsByClassName('baseLine')[0]
-        let baseLineElY = parseFloat(baseLineEl.getAttribute('y1'))
-        let baseLineElX = parseFloat(baseLineEl.getAttribute('x1'))
-        let minimapHeight = parseFloat(this.minimapEl.getAttribute('height'))
-        let scalingRectangleWidth = parseFloat(this.__scalingRectangleBig.getAttribute('width'))
-        let baseLineElX2 = parseFloat(baseLineEl.getAttribute('x2'))
-        let baselineWidth = baseLineElX2 - baseLineElX
-        let xRatio = baselineWidth/scalingRectangleWidth
-        let upperLineEl = this.__gridX.getElementsByClassName('upperLine')[0]
-        let upperLineElY = parseFloat(upperLineEl.getAttribute('y1'))
-        let chartHeight = baseLineElY - upperLineElY
-        let yRatio = chartHeight/minimapHeight
+    drawBigCharts() {
+        const chartData = this.chartData,
+        baseLineEl = this.__gridX.querySelector('.baseLine'),
+        upperLineEl = this.__gridX.querySelector('.upperLine'),
+        content = this.__chartArea.querySelector('.content'),
 
-        let minimapElY = parseFloat(this.minimapEl.getAttribute('y')) + minimapHeight
-        let polyLineOffset = baseLineElY - minimapElY
-        let content = this.__chartArea.getElementsByClassName('content')[0]
-        for (let i = 0; i < polylines.length; i++) {
-            let newPolyline = polylines[i].cloneNode(true)
-            newPolyline.setAttributeNS(null, 'class', 'bigChart')
-            newPolyline.setAttributeNS(null, 'id', newPolyline.getAttribute('id').replace('mini', 'big'))
-            newPolyline.setAttributeNS(null, 'transform', `translate(0, ${polyLineOffset}) translate(30, 485) scale(${xRatio}, 1) translate(-30, -485)`)
-            content.appendChild(newPolyline)
+        XminSvg = parseFloat(baseLineEl.getAttribute('x1')),
+        YminSvg = parseFloat(upperLineEl.getAttribute('y1')),
+        YmaxSvg = parseFloat(baseLineEl.getAttribute('y1')),
+        offsetX = XminSvg,
+        offsetY = YmaxSvg,
+        maxXDistance = this.__minimapWidth * this.__xScalingFactor,
+        maxYDistance = YmaxSvg-YminSvg
+        
+        for (let i = 0; i < chartData.yColumns.length; i++) {
+            let currentColumn = chartData.yColumns[i]
+            let currPolyline = Draw.createBasicPolyLine("big-" +chartData.names[i], chartData.colors[i]);
+            let xStep = Calc.roundBy(maxXDistance/chartData.xPointCount, 2)
+            let yStep = Calc.roundBy(maxYDistance/chartData.yMax, 2)
+            for (let j = 0; j < currentColumn.length; j++) {
+                let point = this.__svg.createSVGPoint()
+                point.x = offsetX + j * xStep
+                point.y = offsetY - currentColumn[j] * yStep
+                currPolyline.points.appendItem(point)
+            }
+            currPolyline.setAttributeNS(null, 'class', 'bigchart')
+            content.appendChild(currPolyline)
         }
     }
 }
