@@ -17,8 +17,8 @@ export class Draw {
         this.__scalingRectangleSmall = this.scalingRectangleEl.getElementsByClassName('smallRect')[0]
         this.__chartArea = this.bigChartEl.getElementsByClassName('chartArea')[0]
         this.__gridX = this.bigChartEl.getElementsByClassName('x-grid')[0]
-        this.__minimapWidth = this.minimapEl.getAttribute('width'),
-        this.__scalingRectWidth = this.__scalingRectangleBig.getAttribute('width'),
+        this.__minimapWidth = this.minimapEl.getAttribute('width')
+        this.__scalingRectWidth = this.__scalingRectangleBig.getAttribute('width')
         this.__xScalingFactor = Calc.roundBy(this.__minimapWidth/this.__scalingRectWidth, 2)
     }
 
@@ -211,16 +211,16 @@ export class Draw {
         const chartData = this.chartData,
         baseLineEl = this.__gridX.querySelector('.baseLine'),
         upperLineEl = this.__gridX.querySelector('.upperLine'),
+        upperLimit = this.__gridX.querySelector('.upperLimit'),
         content = this.__chartArea.querySelector('.content'),
-
         XminSvg = parseFloat(baseLineEl.getAttribute('x1')),
-        YminSvg = parseFloat(upperLineEl.getAttribute('y1')),
+        YminSvg = parseFloat(upperLineEl.getAttribute('y1')) - parseFloat(upperLimit.getAttribute('y1')),
         YmaxSvg = parseFloat(baseLineEl.getAttribute('y1')),
         offsetX = XminSvg,
         offsetY = YmaxSvg,
         maxXDistance = this.__minimapWidth * this.__xScalingFactor,
         maxYDistance = YmaxSvg-YminSvg
-        
+        console.log(YminSvg)
         for (let i = 0; i < chartData.yColumns.length; i++) {
             let currentColumn = chartData.yColumns[i]
             let currPolyline = Draw.createBasicPolyLine("big-" +chartData.names[i], chartData.colors[i]);
