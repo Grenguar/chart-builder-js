@@ -3,5 +3,4 @@ temp
 *charts.xlsx
 /node_modules
 dist/
-src/files/contest/
 .vscode/
