@@ -40,7 +40,6 @@ export class ChartData {
         formattedData.yMin = yMin
         formattedData.names = names
         formattedData.colors = colors
-        console.log(formattedData)
         return formattedData
     }
 

@@ -13,24 +13,23 @@ export class Minimap {
         const minimapElMaxY = parseInt(minimapEl.getAttribute('y'))
         const maxYDistance = Math.abs(minimapElMaxY - offsetY) 
         const maxXDistance = Math.abs(minimapElMaxX - offsetX)
-        this.drawMinimapCharts(minimapEl, chartData, offsetX, offsetY, maxXDistance, maxYDistance)
+        this.drawCharts(minimapEl.parentNode, chartData, offsetX, offsetY, maxXDistance, maxYDistance, "mini-", "miniChart")
     }
     
-    drawMinimapCharts (minimapEl, chartData, offsetX, offsetY, maxXDistance, maxYDistance) {
+    drawCharts (parentElement, chartData, offsetX, offsetY, maxXDistance, maxYDistance, linePrefix, className, svg) {
         for (let i = 0; i < chartData.yColumns.length; i++) {
             let currentColumn = chartData.yColumns[i]
-            let currPolyline = draw.createBasicPolyLine("mini-" +chartData.names[i], chartData.colors[i]);
+            let currPolyline = draw.createBasicPolyLine(linePrefix + chartData.names[i], chartData.colors[i]);
             let xStep = calc.calculateXStep(maxXDistance, chartData.xPointCount)
             let yStep = maxYDistance/chartData.yMax
-            let svg = minimapEl.parentNode
             for (let j = 0; j < currentColumn.length; j++) {
-                let point = svg.createSVGPoint()
+                let point = parentElement.createSVGPoint()
                 point.x = offsetX + j * xStep
                 point.y = offsetY - currentColumn[j] * yStep
                 currPolyline.points.appendItem(point)
             }
-            currPolyline.setAttributeNS(null, 'class', 'minichart')
-            svg.appendChild(currPolyline)
+            currPolyline.setAttributeNS(null, 'class', className)
+            parentElement.appendChild(currPolyline)
         }
     }
 }

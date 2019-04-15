@@ -39,6 +39,23 @@ export class Draw {
         return svgP
     }
 
+    static drawCharts (parentElement, chartData, offsetX, offsetY, maxXDistance, maxYDistance, linePrefix, className) {
+        for (let i = 0; i < chartData.yColumns.length; i++) {
+            let currentColumn = chartData.yColumns[i]
+            let currPolyline = draw.createBasicPolyLine(linePrefix + chartData.names[i], chartData.colors[i]);
+            let xStep = calc.calculateXStep(maxXDistance, chartData.xPointCount)
+            let yStep = maxYDistance/chartData.yMax
+            for (let j = 0; j < currentColumn.length; j++) {
+                let point = parentElement.createSVGPoint()
+                point.x = offsetX + j * xStep
+                point.y = offsetY - currentColumn[j] * yStep
+                currPolyline.points.appendItem(point)
+            }
+            currPolyline.setAttributeNS(null, 'class', className)
+            parentElement.appendChild(currPolyline)
+        }
+    }
+
     drawVerticalLine(e, callback) {
         const baseLineEl = document.getElementById('baseLine')
         const XminSvg = parseFloat(baseLineEl.getAttribute('x1'))
@@ -65,9 +82,9 @@ export class Draw {
             line.setAttributeNS(null, 'y2', baseLineY)
             line.classList.add('grid')
             this.__chartArea.appendChild(line)    
-            if (typeof callback === "function" && this.__chartArea != null && this.intersectRect(line, this.__chartArea)) {
+            // if (typeof callback === "function" && this.__chartArea != null && this.intersectRect(line, this.__chartArea)) {
                 //callback will happen
-            }   
+            // }   
         }
     }
 
@@ -155,8 +172,8 @@ export class Draw {
 
     dragElement(elmnt, callback) {
         let pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0
-        elmnt.onmousedown = dragMouseDown
-        elmnt.ontouchstart = dragMouseDown
+        document.onmousedown = dragMouseDown
+        document.ontouchstart = dragMouseDown
         const scalingRectangleBig = this.__scalingRectangleBig
         const scalingRectangleSmall = this.__scalingRectangleSmall
         const minimap = this.minimapEl
@@ -220,7 +237,6 @@ export class Draw {
         offsetY = YmaxSvg,
         maxXDistance = this.__minimapWidth * this.__xScalingFactor,
         maxYDistance = YmaxSvg-YminSvg
-        console.log(YminSvg)
         for (let i = 0; i < chartData.yColumns.length; i++) {
             let currentColumn = chartData.yColumns[i]
             let currPolyline = Draw.createBasicPolyLine("big-" +chartData.names[i], chartData.colors[i]);
@@ -236,6 +252,8 @@ export class Draw {
             content.appendChild(currPolyline)
         }
     }
+
+    draw
 }
 
 function getMinicharts(parent) {

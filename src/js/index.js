@@ -4,24 +4,21 @@ import { Minimap } from './minimap'
 import { Draw } from './draw'
 
 
-const svg = document.getElementById('chart')
-const minimapElement = document.getElementById('minimap')
-const scalingRectangleElement = document.getElementById('scalingRectangle')
-const bigChartElement = document.getElementById('bigChart')
-
-const chartData = new ChartData()
-const utils = new Utils()
-const firstData = chartData.getFirstData()
-const draw = new Draw(bigChartElement, minimapElement, scalingRectangleElement, firstData)
-
-const buttonEl = document.getElementById('button')
+const svg = document.getElementById('chart'),
+minimapElement = document.getElementById('minimap'),
+scalingRectangleElement = document.getElementById('scalingRectangle'),
+bigChartElement = document.getElementById('bigChart'),
+chartData = new ChartData(),
+utils = new Utils(),
+firstData = chartData.getFirstData(),
+draw = new Draw(bigChartElement, minimapElement, scalingRectangleElement, firstData),
+buttonEl = document.getElementById('button')
 
 document.addEventListener("DOMContentLoaded", () => {
     draw.dragElement(scalingRectangleElement)
-    svg.onmousemove = (e) => {draw.drawVerticalLine(e)}
+    document.onmousemove = (e) => {draw.drawVerticalLine(e)}
     draw.makeChartAreaScrollable()
     buttonEl.onclick = () => {utils.switchTheme()}
-    
     new Minimap(firstData, minimapElement)
     draw.drawBigCharts()
 })
