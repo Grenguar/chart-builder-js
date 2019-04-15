@@ -252,8 +252,6 @@ export class Draw {
             content.appendChild(currPolyline)
         }
     }
-
-    draw
 }
 
 function getMinicharts(parent) {
