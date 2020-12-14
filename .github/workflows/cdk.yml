@@ -17,21 +17,15 @@ jobs:
         with:
           node-version: "10.x"
 
-      - name: Setup dependencies for site code
-        run: cd site/ && npm ci
-
       - name: Build and clean node modules
-        run: npm run build && rm -rf node_modules/ && cd ../infra
+        run: cd site/ && npm ci && npm run build && rm -rf node_modules/
 
       - name: Setup dependencies for infrastructure
-        run: npm ci
-
-      - name: Build
-        run: npm run build
+        run: cd infra/ && npm ci && npm run build
 
       - name: CDK Diff Check
         if: contains(github.event_name, 'pull_request')
-        run: npm run cdk:diff
+        run: cd infra/ && npm run cdk:diff
         env:
           AWS_DEFAULT_REGION: ${{ secrets.REGION }}
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
@@ -39,7 +33,7 @@ jobs:
 
       - name: CDK Deploy
         if: contains(github.event_name, 'push')
-        run: npm run cdk:deploy
+        run: cd infra/ && npm run cdk:deploy
         env:
           AWS_DEFAULT_REGION: ${{ secrets.REGION }}
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
